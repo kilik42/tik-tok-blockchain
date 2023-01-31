@@ -25,6 +25,42 @@ contract TikTok {
 
     uint public videoCount = 0;
 
+    function createVideo(string memory _caption, string memory _url) public {
+      require(bytes(_caption).length > 0);
+      require(bytes(_url).length > 0);
+      require(msg.sender != address(0));
+      videoCount++;
+      videos[videoCount] = Video(_caption, _url, 0, 0, msg.sender, new address[](0));
+
+      // Trigger an event
+      emit VideoCreated(videoCount, _caption, _url, 0, 0, msg.sender);
+      emit VideoLiked(videoCount, 0, msg.sender);
+      emit VideoDisliked(videoCount, 0, msg.sender);
+    }
+
+    function likeVideo(uint _id) public {
+      require(_id > 0 && _id <= videoCount);
+      require(msg.sender != address(0));
+      require(!likedUsers[msg.sender][_id]);
+      require(!dislikedUsers[msg.sender][_id]);
+      videos[_id].likes++;
+      videos[_id].likers.push(msg.sender);
+      likedUsers[msg.sender][_id] = true;
+      emit VideoLiked(_id, videos[_id].likes, msg.sender);
+    }
+
+    function dislikeVideo(uint _id) public {
+      require(_id > 0 && _id <= videoCount);
+      require(msg.sender != address(0));
+      require(!likedUsers[msg.sender][_id]);
+      require(!dislikedUsers[msg.sender][_id]);
+      videos[_id].dislikes++;
+      dislikedUsers[msg.sender][_id] = true;
+      emit VideoDisliked(_id, videos[_id].dislikes, msg.sender);
+    }
+
+    
+
     function uploadVideo(string memory _caption, string memory _url) public {
       require(bytes(_caption).length > 0);
       require(bytes(_url).length > 0);
@@ -47,4 +83,6 @@ contract TikTok {
     );
     event VideoLiked (uint id, uint256 likes, address owner);
     event VideoDisliked (uint id, uint256 dislikes, address owner);
+
+
 }
