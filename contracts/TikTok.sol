@@ -31,7 +31,11 @@ contract TikTok {
       require(msg.sender != address(0));
       videoCount++;
       videos[videoCount] = Video(_caption, _url, 0, 0, msg.sender, new address[](0));
+
+      // Trigger an event
       emit VideoCreated(videoCount, _caption, _url, 0, 0, msg.sender);
+      emit VideoLiked(videoCount, 0, msg.sender);
+      emit VideoDisliked(videoCount, 0, msg.sender);
     }
     event VideoCreated(
       uint id,
@@ -41,4 +45,6 @@ contract TikTok {
       uint256 dislikes,
       address owner
     );
+    event VideoLiked (uint id, uint256 likes, address owner);
+    event VideoDisliked (uint id, uint256 dislikes, address owner);
 }
