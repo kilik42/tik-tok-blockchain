@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <0.9.0;
+pragma solidity >=0.8.17;
 
 contract TikTok {
   constructor() public {
@@ -12,7 +12,7 @@ contract TikTok {
       uint256 likes;
       uint256 dislikes;
       address owner;
-      address[] likers;
+      address[] likedUsers;
 
     }
 
@@ -38,13 +38,17 @@ contract TikTok {
       emit VideoDisliked(videoCount, 0, msg.sender);
     }
 
-    function likeVideo(uint _id) public {
+    function likeVideo(uint256 _id) public {
+      Video storage _video = videos[_id];
       require(_id > 0 && _id <= videoCount);
       require(msg.sender != address(0));
+      require(likedUsers[msg.sender][_id] == false, "you already liked this video");
       require(!likedUsers[msg.sender][_id]);
       require(!dislikedUsers[msg.sender][_id]);
-      videos[_id].likes++;
-      videos[_id].likers.push(msg.sender);
+      
+      likes[_id] = likes[_id] + 1;
+      _video.likes++;
+      _video.likedUsers.push(msg.sender);
       likedUsers[msg.sender][_id] = true;
       emit VideoLiked(_id, videos[_id].likes, msg.sender);
     }
@@ -59,6 +63,17 @@ contract TikTok {
       emit VideoDisliked(_id, videos[_id].dislikes, msg.sender);
     }
 
+    // function getNumberOfVideos() public view returns(uint) {
+    //   return videoCount;
+    // }
+
+    function getVideos() public view returns(Video[] memory) {
+      Video[] memory _videos = new Video[](videoCount);
+      for(uint i = 0; i < videoCount; i++) {
+        _videos[i] = videos[i + 1];
+      }
+      return _videos;
+    }
     
 
     function uploadVideo(string memory _caption, string memory _url) public {
@@ -84,5 +99,9 @@ contract TikTok {
     event VideoLiked (uint id, uint256 likes, address owner);
     event VideoDisliked (uint id, uint256 dislikes, address owner);
 
+
+    function getNumberOfVideos() public view returns(uint) {
+      return videoCount;
+    }
 
 }
